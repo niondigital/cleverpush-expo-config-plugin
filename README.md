@@ -18,10 +18,17 @@ For bare React Native projects, you must ensure that you have [installed and con
 ### Add the package to your npm dependencies
 
 ```
-npm install expo-cleverpush
+npm install expo-cleverpush --save-dev
 ```
 
+Please make sure to also add the react native package to your project for using die CleverPush React Native SDK.
+```
+npm install cleverpush-react-native --save
+```
 
+## Thanks
+
+Inspired by and in parts based on the OneSignal Expo Plugin.
 
 
 # Contributing
