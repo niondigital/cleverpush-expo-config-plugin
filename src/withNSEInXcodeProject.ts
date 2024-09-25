@@ -77,6 +77,7 @@ export const withNSEInXcodeProject: ConfigPlugin<CleverPushPluginProps> = (confi
 				buildSettingsObj.IPHONEOS_DEPLOYMENT_TARGET = IPHONEOS_DEPLOYMENT_TARGET;
 				buildSettingsObj.TARGETED_DEVICE_FAMILY = TARGETED_DEVICE_FAMILY;
 				buildSettingsObj.INFOPLIST_FILE = `${NSE_TARGET_NAME}/Info.plist`;
+				buildSettingsObj.SWIFT_VERSION = '5.0';
 			}
 		}
 
