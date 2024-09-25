@@ -1,0 +1,9 @@
+{
+  "platforms": ["ios", "android"],
+  "ios": {
+    "modules": ["CleverPush"]
+  },
+  "android": {
+    "modules": ["com.cleverpush.reactnative.RNCleverPush"]
+  }
+}
