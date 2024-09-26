@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/expo-cleverpush.iml" filepath="$PROJECT_DIR$/expo-cleverpush.iml" />
+      <module fileurl="file://$PROJECT_DIR$/cleverpush-expo-config-plugin.iml" filepath="$PROJECT_DIR$/cleverpush-expo-config-plugin.iml" />
     </modules>
   </component>
 </project>

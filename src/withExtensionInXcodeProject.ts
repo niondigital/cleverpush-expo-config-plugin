@@ -1,4 +1,5 @@
 import { ConfigPlugin, withXcodeProject } from '@expo/config-plugins';
+
 import { IPHONEOS_DEPLOYMENT_TARGET, TARGETED_DEVICE_FAMILY } from './constants';
 
 /**
@@ -9,7 +10,10 @@ import { IPHONEOS_DEPLOYMENT_TARGET, TARGETED_DEVICE_FAMILY } from './constants'
  * @param config
  * @param props
  */
-export const withExtensionInXcodeProject: ConfigPlugin<{ targetName: string; files: string[]; sourceFile?: string }> = (config, { targetName, files, sourceFile }) => {
+export const withExtensionInXcodeProject: ConfigPlugin<{ targetName: string; files: string[]; sourceFile?: string }> = (
+	config,
+	{ targetName, files, sourceFile }
+) => {
 	return withXcodeProject(config, (newConfig) => {
 		const xcodeProject = newConfig.modResults;
 
@@ -19,11 +23,7 @@ export const withExtensionInXcodeProject: ConfigPlugin<{ targetName: string; fil
 		}
 
 		// Create new PBXGroup for the extension
-		const extGroup = xcodeProject.addPbxGroup(
-			files,
-			targetName,
-			targetName
-		);
+		const extGroup = xcodeProject.addPbxGroup(files, targetName, targetName);
 
 		// Add the new PBXGroup to the top level group. This makes the
 		// files / folder appear in the file explorer in Xcode.
@@ -57,11 +57,10 @@ export const withExtensionInXcodeProject: ConfigPlugin<{ targetName: string; fil
 		xcodeProject.addBuildPhase([], 'PBXFrameworksBuildPhase', 'Frameworks', newTarget.uuid);
 
 		// Set the most essential (and necessary) build settings of the new target
-		const configurations: { buildSettings: Record<string, string | number> | undefined }[] = xcodeProject.pbxXCBuildConfigurationSection();
+		const configurations: { buildSettings: Record<string, string | number> | undefined }[] =
+			xcodeProject.pbxXCBuildConfigurationSection();
 		Object.values(configurations).forEach((configuration) => {
-			if (
-				configuration.buildSettings?.PRODUCT_NAME === `"${targetName}"`
-			) {
+			if (configuration.buildSettings?.PRODUCT_NAME === `"${targetName}"`) {
 				const buildSettings = configuration.buildSettings;
 
 				buildSettings.IPHONEOS_DEPLOYMENT_TARGET = IPHONEOS_DEPLOYMENT_TARGET;
@@ -72,7 +71,7 @@ export const withExtensionInXcodeProject: ConfigPlugin<{ targetName: string; fil
 				// The version and build number in the Info.plist need to match the version of the main target.
 				// Set MARKETING_VERSION and CURRENT_PROJECT_VERSION so Info.plist can use those variables
 				buildSettings.MARKETING_VERSION = config.version ?? '1.0.0';
-				buildSettings.CURRENT_PROJECT_VERSION = config.ios?.buildNumber ?? 1
+				buildSettings.CURRENT_PROJECT_VERSION = config.ios?.buildNumber ?? 1;
 			}
 		});
 
