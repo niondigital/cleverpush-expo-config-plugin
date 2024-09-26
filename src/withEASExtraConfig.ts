@@ -1,5 +1,5 @@
 import { ConfigPlugin, } from '@expo/config-plugins';
-import { APP_GROUP_SUFFIX, NSE_TARGET_NAME } from './constants';
+import { APP_GROUP_SUFFIX, NCE_TARGET_NAME, NSE_TARGET_NAME } from './constants';
 import { CleverPushPluginProps } from './types/types';
 
 /**
@@ -11,6 +11,28 @@ import { CleverPushPluginProps } from './types/types';
  * @param props
  */
 export const withEASExtraConfig: ConfigPlugin<CleverPushPluginProps> = (config, props) => {
+	const newAppExtensions = [{
+		targetName: NSE_TARGET_NAME,
+		bundleIdentifier: `${config?.ios?.bundleIdentifier}.${NSE_TARGET_NAME}`,
+		entitlements: {
+			'com.apple.security.application-groups': [
+				`group.${config?.ios?.bundleIdentifier}.${APP_GROUP_SUFFIX}`
+			]
+		}
+	}];
+
+	if (props.includeContentExtension) {
+		newAppExtensions.push({
+			targetName: NCE_TARGET_NAME,
+			bundleIdentifier: `${config?.ios?.bundleIdentifier}.${NCE_TARGET_NAME}`,
+			entitlements: {
+				'com.apple.security.application-groups': [
+					`group.${config?.ios?.bundleIdentifier}.${APP_GROUP_SUFFIX}`
+				]
+			}
+		});
+	}
+
 	config.extra = {
 		...config.extra,
 		eas: {
@@ -23,16 +45,7 @@ export const withEASExtraConfig: ConfigPlugin<CleverPushPluginProps> = (config, 
 						...config.extra?.eas?.build?.experimental?.ios,
 						appExtensions: [
 							...(config.extra?.eas?.build?.experimental?.ios?.appExtensions ?? []),
-							{
-								// keep in sync with native changes in NSE
-								targetName: NSE_TARGET_NAME,
-								bundleIdentifier: `${config?.ios?.bundleIdentifier}.${NSE_TARGET_NAME}`,
-								entitlements: {
-									'com.apple.security.application-groups': [
-										`group.${config?.ios?.bundleIdentifier}.${APP_GROUP_SUFFIX}`
-									]
-								}
-							}
+							...newAppExtensions
 						]
 					}
 				}

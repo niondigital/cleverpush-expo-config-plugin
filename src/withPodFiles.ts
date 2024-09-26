@@ -1,17 +1,18 @@
 import { ConfigPlugin, withDangerousMod } from '@expo/config-plugins';
 import fs from 'fs';
 import path from 'path';
-import { NSE_TARGET_NAME } from './constants';
+import { NCE_TARGET_NAME, NSE_TARGET_NAME } from './constants';
 import { CleverPushPluginProps } from './types/types';
 
-const additionalContent = `
+const nsePodContent = `
 target '${NSE_TARGET_NAME}' do
   pod 'CleverPush'
 end`;
-/*
-target 'CleverPushNotificationContentExtension' do
+
+const ncePodContent = `
+target '${NCE_TARGET_NAME}' do
   pod 'CleverPush'
-end`;*/
+end`;
 
 export const withPodFiles: ConfigPlugin<CleverPushPluginProps> = (config, props) => {
 	return withDangerousMod(config, [
@@ -22,11 +23,12 @@ export const withPodFiles: ConfigPlugin<CleverPushPluginProps> = (config, props)
 			try {
 				const podfileContent = await fs.promises.readFile(`${iosPath}/Podfile`, 'utf8');
 
-				if (podfileContent.match(NSE_TARGET_NAME)) {
-					console.log(`${NSE_TARGET_NAME} target already added to Podfile. Skipping...`);
-				} else {
-					await fs.promises.appendFile(`${iosPath}/Podfile`, additionalContent);
+				let additionalContent = nsePodContent;
+				if (props.includeContentExtension) {
+					additionalContent += ncePodContent;
 				}
+
+				await fs.promises.appendFile(`${iosPath}/Podfile`, additionalContent);
 			} catch (error) {
 				console.error(error);
 			}
