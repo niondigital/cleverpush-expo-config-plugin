@@ -3,8 +3,10 @@ export const NSE_SOURCE_FILE = 'NotificationService.swift';
 export const NSE_FILES = [NSE_SOURCE_FILE, 'Info.plist'];
 
 export const NCE_TARGET_NAME = 'CleverPushNotificationContentExtension';
-export const NCE_SOURCE_FILE = 'NotificationViewController.swift';
-export const NCE_FILES = [NCE_SOURCE_FILE, 'Info.plist'];
+// TODO Swift version is not working right now, check again in future
+// export const NCE_SOURCE_FILE = 'NotificationViewController.swift';
+export const NCE_SOURCE_FILE = 'NotificationViewController.m';
+export const NCE_FILES = [NCE_SOURCE_FILE, 'NotificationViewController.h', 'Info.plist'];
 
 export const APP_GROUP_SUFFIX = 'cleverpush';
 
