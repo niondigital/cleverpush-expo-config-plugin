@@ -22,16 +22,14 @@ export const withCleverPushNSEFiles: ConfigPlugin<CleverPushPluginProps> = (conf
 			await fs.promises.mkdir(nsePath, { recursive: true });
 
 			await Promise.all([NSE_FILES.map(async (file) => {
-				const targetFile = `${nsePath}/${file}`;
-
-				await fs.promises.copyFile(`${sourcePath}/${file}`, targetFile);
+				await fs.promises.copyFile(`${sourcePath}/${file}`, `${nsePath}/${file}`);
 
 				// The version and build number in the Info.plist need to match the version of the main target
-				if (targetFile === 'Info.plist') {
-					let content = await fs.promises.readFile(`${targetFile}`, 'utf8');
+				if (file === 'Info.plist') {
+					let content = await fs.promises.readFile(`${nsePath}/${file}`, 'utf8');
 					content = content.replace(/(<key>CFBundleShortVersionString<\/key>\s+<string>)(\d.+)(<\/string>)/gm, `$1${config.version}$3`);
 					content = content.replace(/(<key>CFBundleVersion<\/key>\s+<string>)(\d+)(<\/string>)/gm, `$1${config.ios?.buildNumber ?? 1}$3`);
-					await fs.promises.writeFile(`${targetFile}`, content);
+					await fs.promises.writeFile(`${nsePath}/${file}`, content);
 				}
 			})]);
 
