@@ -7,16 +7,12 @@ import { CleverPushPluginProps } from './types/types';
 
 const nsePodContent = `
 target '${NSE_TARGET_NAME}' do
-  use_frameworks!
-
   pod 'CleverPush'
 end
 `;
 
 const ncePodContent = `
 target '${NCE_TARGET_NAME}' do
-  use_frameworks!
-
   pod 'CleverPush'
 end
 `;
