@@ -1,6 +1,7 @@
 import UIKit
 import UserNotifications
 import UserNotificationsUI
+import CleverPush
 
 class NotificationViewController: CPNotificationViewController, UNNotificationContentExtension {
 
