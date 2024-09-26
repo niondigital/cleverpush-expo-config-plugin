@@ -58,7 +58,7 @@ export const withExtensionInXcodeProject: ConfigPlugin<{ targetName: string; fil
 		xcodeProject.addBuildPhase([], 'PBXFrameworksBuildPhase', 'Frameworks', newTarget.uuid);
 
 		// Set the most essential (and necessary) build settings of the new target
-		const configurations: { buildSettings: Record<string, string> | undefined }[] = xcodeProject.pbxXCBuildConfigurationSection();
+		const configurations: { buildSettings: Record<string, string | number> | undefined }[] = xcodeProject.pbxXCBuildConfigurationSection();
 		Object.values(configurations).forEach((configuration) => {
 			if (
 				configuration.buildSettings?.PRODUCT_NAME === `"${targetName}"`
@@ -69,6 +69,11 @@ export const withExtensionInXcodeProject: ConfigPlugin<{ targetName: string; fil
 				buildSettings.TARGETED_DEVICE_FAMILY = TARGETED_DEVICE_FAMILY;
 				buildSettings.INFOPLIST_FILE = `${targetName}/Info.plist`;
 				buildSettings.SWIFT_VERSION = '5.0';
+
+				// The version and build number in the Info.plist need to match the version of the main target.
+				// Set MARKETING_VERSION and CURRENT_PROJECT_VERSION so Info.plist can use those variables
+				buildSettings.MARKETING_VERSION = config.version ?? '1.0.0';
+				buildSettings.CURRENT_PROJECT_VERSION = config.ios?.buildNumber ?? 1
 			}
 		});
 

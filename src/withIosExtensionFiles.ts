@@ -25,6 +25,9 @@ export const withIosExtensionFiles: ConfigPlugin<{ extensionName: string; files:
 				await fs.promises.copyFile(`${sourcePath}/${file}`, `${targetExtensionPath}/${file}`);
 
 				// The version and build number in the Info.plist need to match the version of the main target
+
+				// PLease note: Right now this plugin uses MARKETING_VERSION and CURRENT_PROJECT_VERSION to set the version and build number in the Info.plist
+				// We still keep this replacing logic to archive a more generic function for the future
 				if (file === 'Info.plist') {
 					let content = await fs.promises.readFile(`${targetExtensionPath}/${file}`, 'utf8');
 					content = content.replace(/(<key>CFBundleShortVersionString<\/key>\s+<string>)(\d.+)(<\/string>)/gm, `$1${config.version}$3`);
