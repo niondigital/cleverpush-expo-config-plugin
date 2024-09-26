@@ -24,5 +24,8 @@
   ],
   "author": "nion digital GmbH",
   "license": "MIT",
-  "homepage": "https://www.nion-digital.com"
+  "homepage": "https://www.nion-digital.com",
+  "bugs": {
+    "url": "https://github.com/niondigital/cleverpush-expo-config-plugin/issues"
+  }
 }

@@ -9,7 +9,7 @@ import { IPHONEOS_DEPLOYMENT_TARGET, TARGETED_DEVICE_FAMILY } from './constants'
  * @param config
  * @param props
  */
-export const withExtensionInXcodeProject: ConfigPlugin<{ targetName: string; files: string[]; }> = (config, { targetName, files }) => {
+export const withExtensionInXcodeProject: ConfigPlugin<{ targetName: string; files: string[]; sourceFile?: string }> = (config, { targetName, files, sourceFile }) => {
 	return withXcodeProject(config, (newConfig) => {
 		const xcodeProject = newConfig.modResults;
 
@@ -52,8 +52,7 @@ export const withExtensionInXcodeProject: ConfigPlugin<{ targetName: string; fil
 		);
 
 		// Add build phases to the new target
-		// TODO check xcodeProject.addBuildPhase([sourceFile], 'PBXSourcesBuildPhase', 'Sources', newTarget.uuid);
-		xcodeProject.addBuildPhase([], 'PBXSourcesBuildPhase', 'Sources', newTarget.uuid);
+		xcodeProject.addBuildPhase(sourceFile ? [sourceFile] : [], 'PBXSourcesBuildPhase', 'Sources', newTarget.uuid);
 		xcodeProject.addBuildPhase([], 'PBXResourcesBuildPhase', 'Resources', newTarget.uuid);
 		xcodeProject.addBuildPhase([], 'PBXFrameworksBuildPhase', 'Frameworks', newTarget.uuid);
 
