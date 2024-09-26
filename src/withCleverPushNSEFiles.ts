@@ -28,10 +28,10 @@ export const withCleverPushNSEFiles: ConfigPlugin<CleverPushPluginProps> = (conf
 
 				// The version and build number in the Info.plist need to match the version of the main target
 				if (targetFile === 'Info.plist') {
-					let content = await fs.promises.readFile(`${nsePath}/Info.plist`, 'utf8');
-					content = content.replace(/(<key>CFBundleShortVersionString<\/key>\s+<string>)(\d.+)(<\/string>)/gm, `$1${config?.version}$3`);
-					content = content.replace(/(<key>CFBundleVersion<\/key>\s+<string>)(\d+)(<\/string>)/gm, `$1${config.ios?.buildNumber}$3`);
-					await fs.promises.writeFile(`${nsePath}/Info.plist`, content);
+					let content = await fs.promises.readFile(`${targetFile}`, 'utf8');
+					content = content.replace(/(<key>CFBundleShortVersionString<\/key>\s+<string>)(\d.+)(<\/string>)/gm, `$1${config.version}$3`);
+					content = content.replace(/(<key>CFBundleVersion<\/key>\s+<string>)(\d+)(<\/string>)/gm, `$1${config.ios?.buildNumber ?? 1}$3`);
+					await fs.promises.writeFile(`${targetFile}`, content);
 				}
 			})]);
 
