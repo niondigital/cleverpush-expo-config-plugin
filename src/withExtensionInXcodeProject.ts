@@ -5,8 +5,6 @@ import { IPHONEOS_DEPLOYMENT_TARGET, TARGETED_DEVICE_FAMILY } from './constants'
 /**
  * Adds an extension target to the Xcode project.
  *
- * Heavily based on https://github.com/OneSignal/onesignal-expo-plugin/blob/main/onesignal/withOneSignalIos.ts
- *
  * @param config
  * @param props
  */
