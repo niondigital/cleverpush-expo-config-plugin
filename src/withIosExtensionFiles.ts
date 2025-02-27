@@ -10,7 +10,7 @@ import path from 'path';
  * @param props
  */
 export const withIosExtensionFiles: ConfigPlugin<{ extensionName: string; files: string[] }> = (config, props) => {
-	const sourcePath = path.join(__dirname, `../extensions/${props.extensionName}`);
+	const sourcePath = path.join(__dirname, `../extensions/ios/${props.extensionName}`);
 
 	return withDangerousMod(config, [
 		'ios',
