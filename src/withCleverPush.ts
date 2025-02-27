@@ -2,6 +2,7 @@ import { ConfigPlugin } from '@expo/config-plugins';
 
 import { NCE_FILES, NCE_SOURCE_FILE, NCE_TARGET_NAME, NSE_FILES, NSE_SOURCE_FILE, NSE_TARGET_NAME } from './constants';
 import { CleverPushPluginProps } from './types/types';
+import { withAndroidNotificationIcon } from './withAndroidNotificationIcon';
 import { withAppGroup } from './withAppGroup';
 import { withEASExtraConfig } from './withEASExtraConfig';
 import { withExtensionInXcodeProject } from './withExtensionInXcodeProject';
@@ -36,6 +37,9 @@ const withCleverPush: ConfigPlugin<CleverPushPluginProps> = (config, props) => {
 	}
 
 	config = withPodFiles(config, props);
+
+	config = withAndroidNotificationIcon(config, props);
+
 	config = withEASExtraConfig(config, props);
 
 	return config;
