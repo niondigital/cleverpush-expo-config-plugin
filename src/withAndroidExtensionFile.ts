@@ -1,6 +1,8 @@
 import { ConfigPlugin, withDangerousMod } from '@expo/config-plugins';
+import { withBuildProperties } from 'expo-build-properties';
 import fs from 'fs';
 import path from 'path';
+
 import { CleverPushPluginProps } from './types/types';
 
 /**
@@ -14,9 +16,7 @@ export const withAndroidExtensionFile: ConfigPlugin<CleverPushPluginProps> = (co
 
 	const packageName = config.android?.package as string;
 
-	const sourcePath = path.join(__dirname, `../extensions/android/`);
-
-	return withDangerousMod(config, [
+	config = withDangerousMod(config, [
 		'android',
 		async (config) => {
 			const androidPath = path.join(config.modRequest.projectRoot, 'android');
@@ -33,4 +33,20 @@ export const withAndroidExtensionFile: ConfigPlugin<CleverPushPluginProps> = (co
 			return config;
 		}
 	]);
+
+	const sourcePath = path.join(__dirname, `../extensions/android/`);
+
+	// Add Proguard rules
+	return withBuildProperties(config, {
+		android: {
+			extraProguardRules: `
+# ProGuard Rules for Cleverpush Notification Service
+-keep class com.cleverpush.** { *; }
+-keep interface com.cleverpush.** { *; }
+-keep class com.firebase.** { *; }
+-keep class com.google.firebase.** { *; }
+-keep class com.google.gson.internal.LinkedTreeMap { *; }
+-keep class ${packageName}.${filename.split('.java')[0]} { *; }`
+		}
+	});
 };
