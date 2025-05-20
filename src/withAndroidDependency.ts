@@ -3,7 +3,7 @@ import { CleverPushPluginProps } from './types/types';
 import { ConfigPlugin, withAppBuildGradle } from '@expo/config-plugins';
 
 const dependency = `
-	implementation('com.cleverpush:cleverpush:1.34.23') {
+	implementation('com.cleverpush:cleverpush:1.34.40') {
 		exclude group: 'com.google.firebase', module: 'firebase-messaging'
 	}`;
 

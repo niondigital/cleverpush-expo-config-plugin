@@ -7,7 +7,7 @@ import { CleverPushPluginProps } from './types/types';
 
 const nsePodContent = `
 target '${NSE_TARGET_NAME}' do
-  pod 'CleverPush'
+  pod 'CleverPush/CleverPushExtension'
 end
 `;
 

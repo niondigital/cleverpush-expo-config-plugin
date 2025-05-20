@@ -4,9 +4,9 @@ import { NCE_FILES, NCE_SOURCE_FILE, NCE_TARGET_NAME, NSE_FILES, NSE_SOURCE_FILE
 import { CleverPushPluginProps } from './types/types';
 import { withAndroidDependency } from './withAndroidDependency';
 import { withAndroidExtensionFile } from './withAndroidExtensionFile';
-import { withExtensionAndroidManifest } from './withExtensionAndroidManifest';
 import { withAppGroup } from './withAppGroup';
 import { withEASExtraConfig } from './withEASExtraConfig';
+import { withExtensionAndroidManifest } from './withExtensionAndroidManifest';
 import { withExtensionInXcodeProject } from './withExtensionInXcodeProject';
 import { withIosExtensionFiles } from './withIosExtensionFiles';
 import { withPodFiles } from './withPodFiles';
