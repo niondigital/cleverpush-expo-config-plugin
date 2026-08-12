@@ -1,4 +1,4 @@
-import { ConfigPlugin, withDangerousMod } from '@expo/config-plugins';
+import { ConfigPlugin, withDangerousMod } from 'expo/config-plugins';
 import { withBuildProperties } from 'expo-build-properties';
 import fs from 'fs';
 import path from 'path';

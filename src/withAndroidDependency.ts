@@ -1,6 +1,6 @@
-import { CleverPushPluginProps } from './types/types';
+import { ConfigPlugin, withAppBuildGradle } from 'expo/config-plugins';
 
-import { ConfigPlugin, withAppBuildGradle } from '@expo/config-plugins';
+import { CleverPushPluginProps } from './types/types';
 
 const dependency = `
 	implementation('com.cleverpush:cleverpush:1.34.40') {
@@ -12,7 +12,6 @@ const dependency = `
  */
 export const withAndroidDependency: ConfigPlugin<CleverPushPluginProps> = (config, props) => {
 	return withAppBuildGradle(config, (config) => {
-
 		if (!config.modResults.contents.includes(dependency)) {
 			config.modResults.contents = config.modResults.contents.replace(
 				/dependencies\s?{/,

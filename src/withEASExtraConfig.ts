@@ -1,4 +1,4 @@
-import { ConfigPlugin } from '@expo/config-plugins';
+import { ConfigPlugin } from 'expo/config-plugins';
 
 import { APP_GROUP_SUFFIX, NCE_TARGET_NAME, NSE_TARGET_NAME } from './constants';
 import { CleverPushPluginProps } from './types/types';

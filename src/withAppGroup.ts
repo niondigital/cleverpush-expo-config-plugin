@@ -1,4 +1,4 @@
-import { ConfigPlugin, withEntitlementsPlist } from '@expo/config-plugins';
+import { ConfigPlugin, withEntitlementsPlist } from 'expo/config-plugins';
 
 import { APP_GROUP_SUFFIX } from './constants';
 import { CleverPushPluginProps } from './types/types';

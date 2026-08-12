@@ -1,4 +1,4 @@
-import { ConfigPlugin, withAndroidManifest } from '@expo/config-plugins';
+import { ConfigPlugin, withAndroidManifest } from 'expo/config-plugins';
 
 import { CleverPushPluginProps } from './types/types';
 
@@ -10,13 +10,12 @@ export const withExtensionAndroidManifest: ConfigPlugin<CleverPushPluginProps> =
 	const metaDataValue = `${config.android?.package as string}.ExpoNotificationServiceExtension`;
 
 	return withAndroidManifest(config, (config) => {
-		const androidManifest = config.modResults.manifest;
+		const application = config.modResults.manifest?.application?.[0];
 
-		if (!androidManifest?.application) {
-			throw new Error('No manifest found');
+		if (!application) {
+			throw new Error('No <application> element found in AndroidManifest.xml');
 		}
 
-		const application = androidManifest.application[0];
 		application['meta-data'] = application['meta-data'] || [];
 
 		if (!application['meta-data'].some((item) => item.$['android:name'] === metaDataName)) {

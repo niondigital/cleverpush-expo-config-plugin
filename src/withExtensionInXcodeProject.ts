@@ -1,4 +1,4 @@
-import { ConfigPlugin, withXcodeProject } from '@expo/config-plugins';
+import { ConfigPlugin, withXcodeProject } from 'expo/config-plugins';
 
 import { IPHONEOS_DEPLOYMENT_TARGET, TARGETED_DEVICE_FAMILY } from './constants';
 
