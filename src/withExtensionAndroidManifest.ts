@@ -1,4 +1,4 @@
-import { ConfigPlugin, withAndroidManifest } from 'expo/config-plugins';
+import { AndroidConfig, ConfigPlugin, withAndroidManifest } from 'expo/config-plugins';
 
 import { CleverPushPluginProps } from './types/types';
 
@@ -10,22 +10,11 @@ export const withExtensionAndroidManifest: ConfigPlugin<CleverPushPluginProps> =
 	const metaDataValue = `${config.android?.package as string}.ExpoNotificationServiceExtension`;
 
 	return withAndroidManifest(config, (config) => {
-		const application = config.modResults.manifest?.application?.[0];
+		const application = AndroidConfig.Manifest.getMainApplicationOrThrow(config.modResults);
 
-		if (!application) {
-			throw new Error('No <application> element found in AndroidManifest.xml');
-		}
-
-		application['meta-data'] = application['meta-data'] || [];
-
-		if (!application['meta-data'].some((item) => item.$['android:name'] === metaDataName)) {
-			application['meta-data'].push({
-				$: {
-					'android:name': metaDataName,
-					'android:value': metaDataValue
-				}
-			});
-		}
+		// Unlike a plain "skip if present" guard, this also updates the value in place when the
+		// entry already exists, e.g. after android.package changed and prebuild runs without --clean.
+		AndroidConfig.Manifest.addMetaDataItemToMainApplication(application, metaDataName, metaDataValue);
 
 		return config;
 	});

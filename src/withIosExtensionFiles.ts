@@ -20,7 +20,7 @@ export const withIosExtensionFiles: ConfigPlugin<{ extensionName: string; files:
 
 			await fs.promises.mkdir(targetExtensionPath, { recursive: true });
 
-			await Promise.all([
+			await Promise.all(
 				props.files.map(async (file) => {
 					await fs.promises.copyFile(`${sourcePath}/${file}`, `${targetExtensionPath}/${file}`);
 
@@ -41,7 +41,7 @@ export const withIosExtensionFiles: ConfigPlugin<{ extensionName: string; files:
 						await fs.promises.writeFile(`${targetExtensionPath}/${file}`, content);
 					}
 				})
-			]);
+			);
 
 			return config;
 		}
