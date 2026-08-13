@@ -1,6 +1,6 @@
 {
   "name": "@niondigital/cleverpush-expo-config-plugin",
-  "version": "1.1.2",
+  "version": "2.0.0",
   "description": "Expo config plugin to add CleverPush extensions on prebuild",
   "main": "build/withCleverPush.js",
   "types": "build/withCleverPush.d.ts",
@@ -8,14 +8,20 @@
     "build": "expo-module build",
     "clean": "expo-module clean",
     "test": "expo-module test",
-    "prepare": "expo-module prepare",
+    "prepare": "expo-module clean && expo-module build",
     "prepublishOnly": "expo-module prepublishOnly",
     "expo-module": "expo-module"
   },
+  "peerDependencies": {
+    "expo": ">=52",
+    "expo-build-properties": ">=0.13.0"
+  },
   "devDependencies": {
-    "expo-build-properties": "^0.13.2",
-    "expo-module-scripts": "^4.0.4",
-    "prettier": "^3.3.3"
+    "@types/node": "^22.20.1",
+    "expo": "^57.0.12",
+    "expo-build-properties": "^57.0.10",
+    "expo-module-scripts": "^56.0.3",
+    "prettier": "^3.9.6"
   },
   "keywords": [
     "expo",
