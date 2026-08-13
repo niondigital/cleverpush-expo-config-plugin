@@ -38,7 +38,7 @@ export const withExtensionInXcodeProject: ConfigPlugin<{ targetName: string; fil
 		//   - https://github.com/apache/cordova-node-xcode/blob/8b98cabc5978359db88dc9ff2d4c015cba40f150/lib/pbxProject.js#L860
 		const projObjects = xcodeProject.hash.project.objects;
 		projObjects['PBXTargetDependency'] = projObjects['PBXTargetDependency'] || {};
-		projObjects['PBXContainerItemProxy'] = projObjects['PBXTargetDependency'] || {};
+		projObjects['PBXContainerItemProxy'] = projObjects['PBXContainerItemProxy'] || {};
 
 		// Add the target
 		// This adds PBXTargetDependency and PBXContainerItemProxy for you
