@@ -10,5 +10,7 @@ export const NCE_FILES = [NCE_SOURCE_FILE, 'NotificationViewController.h', 'Info
 
 export const APP_GROUP_SUFFIX = 'cleverpush';
 
-export const IPHONEOS_DEPLOYMENT_TARGET = '12.0';
+// Fallback only: the extension targets normally inherit the deployment target of the app target.
+// Expo SDK 56 raised the minimum iOS version to 16.4, so no supported app target is below this value.
+export const IPHONEOS_DEPLOYMENT_TARGET = '16.4';
 export const TARGETED_DEVICE_FAMILY = `"1,2"`;
