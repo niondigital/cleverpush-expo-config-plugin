@@ -1,6 +1,6 @@
 {
   "name": "@niondigital/cleverpush-expo-config-plugin",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Expo config plugin to add CleverPush extensions on prebuild",
   "main": "build/withCleverPush.js",
   "types": "build/withCleverPush.d.ts",
