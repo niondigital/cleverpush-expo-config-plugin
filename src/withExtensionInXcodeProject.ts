@@ -15,7 +15,9 @@ export const withExtensionInXcodeProject: ConfigPlugin<{ targetName: string; fil
 	return withXcodeProject(config, (newConfig) => {
 		const xcodeProject = newConfig.modResults;
 
-		if (xcodeProject.pbxTargetByName(targetName)) {
+		// addTarget registers the target comment with surrounding quotes and the lookup compares the comment
+		// verbatim, so a target this plugin added in an earlier run is only found by its quoted name.
+		if (xcodeProject.pbxTargetByName(targetName) || xcodeProject.pbxTargetByName(`"${targetName}"`)) {
 			console.log(`${targetName} already exists in project. Skipping...`);
 			return newConfig;
 		}
