@@ -1,4 +1,4 @@
-import { ExportedConfig } from 'expo/config-plugins';
+import { ExportedConfig, ExportedConfigWithProps } from 'expo/config-plugins';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -13,8 +13,16 @@ target 'App' do
 end
 `;
 
+const projectRoots: string[] = [];
+
+afterEach(() => {
+	projectRoots.splice(0).forEach((projectRoot) => fs.rmSync(projectRoot, { recursive: true, force: true }));
+});
+
 const createProject = (): string => {
 	const projectRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'cleverpush-'));
+	projectRoots.push(projectRoot);
+
 	fs.mkdirSync(path.join(projectRoot, 'ios'));
 	fs.writeFileSync(path.join(projectRoot, 'ios', 'Podfile'), BASE_PODFILE);
 	return projectRoot;
@@ -25,6 +33,7 @@ const runPodFilesMod = async (projectRoot: string, includeContentExtension: bool
 
 	await config.mods!.ios!.dangerous!({
 		...config,
+		modRawConfig: config,
 		modRequest: {
 			projectRoot,
 			platformProjectRoot: path.join(projectRoot, 'ios'),
@@ -34,7 +43,7 @@ const runPodFilesMod = async (projectRoot: string, includeContentExtension: bool
 			introspect: false
 		},
 		modResults: {}
-	});
+	} as ExportedConfigWithProps);
 
 	return fs.readFileSync(path.join(projectRoot, 'ios', 'Podfile'), 'utf8');
 };
@@ -75,5 +84,16 @@ describe('withPodFiles', () => {
 
 		expect(countTargets(podfile, NSE_TARGET_NAME)).toBe(1);
 		expect(countTargets(podfile, NCE_TARGET_NAME)).toBe(1);
+	});
+
+	it('removes the content extension target when the content extension is switched off', async () => {
+		const projectRoot = createProject();
+		const withContentExtension = await runPodFilesMod(projectRoot, true);
+		const withoutContentExtension = await runPodFilesMod(projectRoot, false);
+
+		expect(countTargets(withContentExtension, NCE_TARGET_NAME)).toBe(1);
+		expect(countTargets(withoutContentExtension, NCE_TARGET_NAME)).toBe(0);
+		expect(countTargets(withoutContentExtension, NSE_TARGET_NAME)).toBe(1);
+		expect(withoutContentExtension).toBe(await runPodFilesMod(createProject(), false));
 	});
 });
