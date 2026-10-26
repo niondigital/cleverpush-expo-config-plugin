@@ -46,5 +46,5 @@ Contributions are very welcome! Please refer to guidelines described in the [con
 }
 ```
 
-- `includeContentExtension` (default `true`): also adds the Notification Content Extension.
+- `includeContentExtension` (default `true`): also adds the Notification Content Extension. Changing this option afterwards requires `npx expo prebuild --clean`, a prebuild without `--clean` keeps the targets and Podfile entries of the previous run.
 - The extension targets take the iOS deployment target of the app target. Raise it through `expo.ios.deploymentTarget` in the app config (Expo SDK 56+), the extensions follow automatically.

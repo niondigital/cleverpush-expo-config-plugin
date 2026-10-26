@@ -20,17 +20,6 @@ end
 const hasTarget = (podfile: string, targetName: string): boolean =>
 	new RegExp(`^\\s*target\\s+['"]${targetName}['"]`, 'm').test(podfile);
 
-/**
- * Appends the target block when it is wanted and missing, and removes the block this plugin wrote when it is
- * no longer wanted. A block that was edited by hand is left alone, the plugin only removes what it wrote itself.
- */
-const syncTarget = (podfile: string, targetName: string, content: string, wanted: boolean): string => {
-	if (wanted) {
-		return hasTarget(podfile, targetName) ? podfile : podfile + content;
-	}
-	return podfile.replace(content, '');
-};
-
 export const withPodFiles: ConfigPlugin<CleverPushPluginProps> = (config, props) => {
 	return withDangerousMod(config, [
 		'ios',
@@ -38,16 +27,21 @@ export const withPodFiles: ConfigPlugin<CleverPushPluginProps> = (config, props)
 			const podfilePath = path.join(config.modRequest.projectRoot, 'ios', 'Podfile');
 
 			try {
-				// A prebuild without --clean keeps the Podfile of the previous run, so the target blocks are
-				// reconciled against the current content: CocoaPods rejects a Podfile that declares the same
-				// target twice, and a block whose Xcode target no longer exists aborts pod install.
+				// A prebuild without --clean keeps the Podfile of the previous run, so a target block is only
+				// appended when the Podfile does not declare it yet; CocoaPods rejects a Podfile that declares
+				// the same target twice.
 				const podfile = await fs.promises.readFile(podfilePath, 'utf8');
 
-				let result = syncTarget(podfile, NSE_TARGET_NAME, nsePodContent, true);
-				result = syncTarget(result, NCE_TARGET_NAME, ncePodContent, props.includeContentExtension === true);
+				let additionalContent = '';
+				if (!hasTarget(podfile, NSE_TARGET_NAME)) {
+					additionalContent += nsePodContent;
+				}
+				if (props.includeContentExtension && !hasTarget(podfile, NCE_TARGET_NAME)) {
+					additionalContent += ncePodContent;
+				}
 
-				if (result !== podfile) {
-					await fs.promises.writeFile(podfilePath, result);
+				if (additionalContent) {
+					await fs.promises.appendFile(podfilePath, additionalContent);
 				}
 			} catch (error) {
 				console.error(error);

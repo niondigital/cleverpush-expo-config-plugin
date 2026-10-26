@@ -85,15 +85,4 @@ describe('withPodFiles', () => {
 		expect(countTargets(podfile, NSE_TARGET_NAME)).toBe(1);
 		expect(countTargets(podfile, NCE_TARGET_NAME)).toBe(1);
 	});
-
-	it('removes the content extension target when the content extension is switched off', async () => {
-		const projectRoot = createProject();
-		const withContentExtension = await runPodFilesMod(projectRoot, true);
-		const withoutContentExtension = await runPodFilesMod(projectRoot, false);
-
-		expect(countTargets(withContentExtension, NCE_TARGET_NAME)).toBe(1);
-		expect(countTargets(withoutContentExtension, NCE_TARGET_NAME)).toBe(0);
-		expect(countTargets(withoutContentExtension, NSE_TARGET_NAME)).toBe(1);
-		expect(withoutContentExtension).toBe(await runPodFilesMod(createProject(), false));
-	});
 });
