@@ -1,0 +1,10 @@
+{
+  // Type-checks the tests, which the build config excludes. Jest runs them through Babel without type
+  // information, so this is the only place a signature drift in the tests would surface.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "types": ["node", "jest"]
+  },
+  "exclude": ["**/__mocks__/*"]
+}

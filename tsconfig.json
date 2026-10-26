@@ -6,7 +6,7 @@
     // which is not where main and types point.
     "rootDir": "./src",
     // The preset narrows ambient types to jest; the plugin runs in Node and needs fs, path and __dirname.
-    // No "jest" here: there are no tests and @types/jest is not a declared dependency.
+    // The tests are excluded from the build and type-checked through tsconfig.test.json instead.
     "types": ["node"]
   },
   "include": ["./src"],

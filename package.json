@@ -10,13 +10,15 @@
     "test": "expo-module test",
     "prepare": "expo-module clean && expo-module build",
     "prepublishOnly": "expo-module prepublishOnly",
-    "expo-module": "expo-module"
+    "expo-module": "expo-module",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json"
   },
   "peerDependencies": {
     "expo": ">=52",
     "expo-build-properties": ">=0.13.0"
   },
   "devDependencies": {
+    "@types/jest": "^29.5.13",
     "@types/node": "^22.20.1",
     "expo": "^58.0.0",
     "expo-build-properties": "^58.0.0",
