@@ -29,12 +29,16 @@ const parseProject = (transform: (pbxproj: string) => string = (pbxproj) => pbxp
 	return IOSConfig.XcodeUtils.getPbxproj(projectRoot);
 };
 
-const addServiceExtension = async (project: XcodeProject, ios: ExportedConfig['ios'] = {}): Promise<XcodeProject> => {
+const addServiceExtension = async (
+	project: XcodeProject,
+	ios: ExportedConfig['ios'] = {},
+	version = '1.2.3'
+): Promise<XcodeProject> => {
 	const config = withExtensionInXcodeProject(
 		{
 			name: 'App',
 			slug: 'app',
-			version: '1.2.3',
+			version,
 			ios: { bundleIdentifier: 'com.example.app', buildNumber: '7', ...ios }
 		},
 		{ targetName: NSE_TARGET_NAME, files: NSE_FILES, sourceFile: NSE_SOURCE_FILE }
@@ -136,9 +140,33 @@ describe('withExtensionInXcodeProject', () => {
 		});
 	});
 
+	it('leaves the deployment target unset for a build configuration the app target does not have', async () => {
+		// The first "name = Debug;" in the fixture belongs to the app target.
+		const project = await addServiceExtension(
+			parseProject((pbxproj) => pbxproj.replace('name = Debug;', 'name = Staging;'))
+		);
+
+		const settings = extensionBuildSettings(project);
+		expect(settings.Debug?.IPHONEOS_DEPLOYMENT_TARGET).toBeUndefined();
+		expect(settings.Release?.IPHONEOS_DEPLOYMENT_TARGET).toBe(APP_TARGET_DEPLOYMENT_TARGET);
+	});
+
 	it('does not add the target twice', async () => {
 		const project = await addServiceExtension(await addServiceExtension(parseProject()));
 
 		expect(Object.keys(extensionBuildSettings(project))).toHaveLength(2);
+	});
+
+	it('refreshes the build settings of an existing target on a second run', async () => {
+		const first = await addServiceExtension(parseProject());
+		const second = await addServiceExtension(first, { buildNumber: '8', deploymentTarget: '18.0' }, '2.0.0');
+
+		const settings = extensionBuildSettings(second);
+		expect(Object.keys(settings)).toEqual(['Debug', 'Release']);
+		Object.values(settings).forEach((buildSettings) => {
+			expect(buildSettings.IPHONEOS_DEPLOYMENT_TARGET).toBe('18.0');
+			expect(buildSettings.MARKETING_VERSION).toBe('2.0.0');
+			expect(buildSettings.CURRENT_PROJECT_VERSION).toBe('8');
+		});
 	});
 });
