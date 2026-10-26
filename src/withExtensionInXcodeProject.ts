@@ -1,51 +1,33 @@
-import { ConfigPlugin, withXcodeProject } from 'expo/config-plugins';
+import { ConfigPlugin, ExportedConfig, IOSConfig, withXcodeProject, XcodeProject } from 'expo/config-plugins';
 
-import { IPHONEOS_DEPLOYMENT_TARGET, TARGETED_DEVICE_FAMILY } from './constants';
-
-/**
- * Reads IPHONEOS_DEPLOYMENT_TARGET from the build configurations referenced by the given
- * XCConfigurationList. Values in a pbxproj may be quoted, the quotes are stripped.
- */
-const readDeploymentTarget = (xcodeProject: any, configurationListUuid: string | undefined): string | undefined => {
-	if (!configurationListUuid) {
-		return undefined;
-	}
-
-	const configurationList = xcodeProject.pbxXCConfigurationList()?.[configurationListUuid];
-	const configurations = xcodeProject.pbxXCBuildConfigurationSection();
-
-	for (const { value } of configurationList?.buildConfigurations ?? []) {
-		const target = configurations[value]?.buildSettings?.IPHONEOS_DEPLOYMENT_TARGET;
-		if (typeof target === 'string' && target.length > 0) {
-			return target.replace(/^"(.*)"$/, '$1');
-		}
-	}
-
-	return undefined;
-};
+import { TARGETED_DEVICE_FAMILY } from './constants';
 
 /**
- * Returns the deployment target of the main app target so the extension matches it.
+ * Returns the deployment target the app target has for the given build configuration.
  *
- * An extension is embedded into the app, so a deployment target that differs from the app target either
- * excludes devices the app supports or builds the extension against an iOS version the app no longer
- * targets. The app target is the first native target; the project-level settings are the second source
- * because the Expo template declares the value on both levels. The constant applies only when neither
- * level is readable.
+ * An extension is embedded into the app, so it has to match the app target: a lower value can fall out of the
+ * range Xcode still supports, a higher value excludes devices the app runs on. The value is resolved the way
+ * Expo resolves it for the app target:
+ *
+ * 1. `ios.deploymentTarget` from the app config (Expo SDK 56+). Expo writes it into the app target in a mod of
+ *    its own, and the order in which mods run is not defined, so the config is read directly.
+ * 2. The value the app target declares in the pbxproj, which is the Expo template value on a fresh prebuild.
+ * 3. `undefined` when the app target declares none: the app target then inherits the project-level setting and
+ *    the extension does the same when the build setting stays unset.
  */
-const getAppDeploymentTarget = (xcodeProject: any): string => {
-	try {
-		const { firstTarget } = xcodeProject.getFirstTarget();
-		const { firstProject } = xcodeProject.getFirstProject();
-
-		return (
-			readDeploymentTarget(xcodeProject, firstTarget?.buildConfigurationList) ??
-			readDeploymentTarget(xcodeProject, firstProject?.buildConfigurationList) ??
-			IPHONEOS_DEPLOYMENT_TARGET
-		);
-	} catch {
-		return IPHONEOS_DEPLOYMENT_TARGET;
+const getAppDeploymentTarget = (
+	config: Pick<ExportedConfig, 'ios'>,
+	project: XcodeProject,
+	buildConfiguration: string
+): string | undefined => {
+	if (config.ios?.deploymentTarget) {
+		return config.ios.deploymentTarget;
 	}
+
+	const appConfiguration = IOSConfig.Target.getXCBuildConfigurationFromPbxproj(project, { buildConfiguration });
+	const deploymentTarget = appConfiguration?.buildSettings?.IPHONEOS_DEPLOYMENT_TARGET;
+
+	return deploymentTarget ? IOSConfig.XcodeUtils.unquote(String(deploymentTarget)) : undefined;
 };
 
 /**
@@ -103,14 +85,16 @@ export const withExtensionInXcodeProject: ConfigPlugin<{ targetName: string; fil
 		xcodeProject.addBuildPhase([], 'PBXFrameworksBuildPhase', 'Frameworks', newTarget.uuid);
 
 		// Set the most essential (and necessary) build settings of the new target
-		const deploymentTarget = getAppDeploymentTarget(xcodeProject);
-		const configurations: { buildSettings: Record<string, string | number> | undefined }[] =
+		const configurations: { name: string; buildSettings: Record<string, string | number> | undefined }[] =
 			xcodeProject.pbxXCBuildConfigurationSection();
 		Object.values(configurations).forEach((configuration) => {
 			if (configuration.buildSettings?.PRODUCT_NAME === `"${targetName}"`) {
 				const buildSettings = configuration.buildSettings;
 
-				buildSettings.IPHONEOS_DEPLOYMENT_TARGET = deploymentTarget;
+				const deploymentTarget = getAppDeploymentTarget(newConfig, xcodeProject, configuration.name);
+				if (deploymentTarget) {
+					buildSettings.IPHONEOS_DEPLOYMENT_TARGET = deploymentTarget;
+				}
 				buildSettings.TARGETED_DEVICE_FAMILY = TARGETED_DEVICE_FAMILY;
 				buildSettings.INFOPLIST_FILE = `${targetName}/Info.plist`;
 				buildSettings.SWIFT_VERSION = '5.0';

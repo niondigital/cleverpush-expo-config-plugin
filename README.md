@@ -34,3 +34,17 @@ Inspired by and in parts based on the OneSignal Expo Plugin.
 # Contributing
 
 Contributions are very welcome! Please refer to guidelines described in the [contributing guide]( https://github.com/expo/expo#contributing).
+
+# Configuration
+
+```json
+{
+  "expo": {
+    "ios": { "deploymentTarget": "17.0" },
+    "plugins": [["@niondigital/cleverpush-expo-config-plugin", { "includeContentExtension": true }]]
+  }
+}
+```
+
+- `includeContentExtension` (default `true`): also adds the Notification Content Extension.
+- The extension targets take the iOS deployment target of the app target. Raise it through `expo.ios.deploymentTarget` in the app config (Expo SDK 56+), the extensions follow automatically.
