@@ -51,8 +51,13 @@ const addExtensionTarget = (
 		bundleIdentifier
 	}: { targetName: string; files: string[]; sourceFile?: string; bundleIdentifier: string }
 ) => {
-	// Create new PBXGroup for the extension
-	const extGroup = xcodeProject.addPbxGroup(files, targetName, targetName);
+	// The file paths carry the extension directory, so they are unique project-wide: addPbxGroup and addBuildPhase
+	// reuse any existing reference with an equal path, and a bare "Info.plist" would be shared with another extension
+	// added the same way. Xcode refuses a reference that is a member of more than one group.
+	// The group therefore has no path of its own. It has to be passed as '""': the xcode library writes an omitted
+	// path as the literal `undefined`.
+	const extensionPath = (file: string) => `${targetName}/${file}`;
+	const extGroup = xcodeProject.addPbxGroup(files.map(extensionPath), targetName, '""');
 
 	// Add the new PBXGroup to the top level group. This makes the
 	// files / folder appear in the file explorer in Xcode.
@@ -76,7 +81,12 @@ const addExtensionTarget = (
 	const newTarget = xcodeProject.addTarget(targetName, 'app_extension', targetName, bundleIdentifier);
 
 	// Add build phases to the new target
-	xcodeProject.addBuildPhase(sourceFile ? [sourceFile] : [], 'PBXSourcesBuildPhase', 'Sources', newTarget.uuid);
+	xcodeProject.addBuildPhase(
+		sourceFile ? [extensionPath(sourceFile)] : [],
+		'PBXSourcesBuildPhase',
+		'Sources',
+		newTarget.uuid
+	);
 	xcodeProject.addBuildPhase([], 'PBXResourcesBuildPhase', 'Resources', newTarget.uuid);
 	xcodeProject.addBuildPhase([], 'PBXFrameworksBuildPhase', 'Frameworks', newTarget.uuid);
 };

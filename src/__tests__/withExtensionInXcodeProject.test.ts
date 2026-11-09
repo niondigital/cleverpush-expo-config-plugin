@@ -70,6 +70,26 @@ const extensionBuildSettings = (project: XcodeProject): Record<string, BuildSett
 			.map((configuration) => [configuration.name, configuration.buildSettings!])
 	);
 
+const groupsReferencing = (project: XcodeProject, fileRef: string): string[] =>
+	Object.entries<{ children?: { value: string }[] } | string>(project.hash.project.objects['PBXGroup'])
+		.filter(([, group]) => typeof group === 'object' && group.children?.some((child) => child.value === fileRef))
+		.map(([key]) => key);
+
+const extensionGroup = (project: XcodeProject): { children: { value: string }[] } => {
+	const group = Object.values<{ name?: string; children?: { value: string }[] } | string>(
+		project.hash.project.objects['PBXGroup']
+	).find((candidate) => typeof candidate === 'object' && candidate.name === NSE_TARGET_NAME);
+	if (typeof group !== 'object' || !group.children) {
+		throw new Error('The extension group is missing');
+	}
+	return { children: group.children };
+};
+
+const extensionFilePaths = (project: XcodeProject): string[] =>
+	extensionGroup(project).children.map((child) =>
+		IOSConfig.XcodeUtils.unquote(project.pbxFileReferenceSection()[child.value].path)
+	);
+
 describe('withExtensionInXcodeProject', () => {
 	it('uses the deployment target of the app target for the extension', async () => {
 		const project = await addServiceExtension(parseProject());
@@ -149,6 +169,44 @@ describe('withExtensionInXcodeProject', () => {
 		const settings = extensionBuildSettings(project);
 		expect(settings.Debug?.IPHONEOS_DEPLOYMENT_TARGET).toBeUndefined();
 		expect(settings.Release?.IPHONEOS_DEPLOYMENT_TARGET).toBe(APP_TARGET_DEPLOYMENT_TARGET);
+	});
+
+	it('references the extension files by their path in the ios folder', async () => {
+		const project = await addServiceExtension(parseProject());
+
+		expect(extensionFilePaths(project)).toEqual(NSE_FILES.map((file) => `${NSE_TARGET_NAME}/${file}`));
+	});
+
+	// Another extension, e.g. a widget, that references its files relative to its group adds a bare "Info.plist".
+	it.each(['before', 'after'])('shares no file reference with an extension added %s it', async (order) => {
+		const addOtherExtension = (target: XcodeProject) => target.addPbxGroup(['Info.plist'], 'Widget', 'Widget');
+		let project = parseProject();
+		if (order === 'before') {
+			addOtherExtension(project);
+		}
+		project = await addServiceExtension(project);
+		if (order === 'after') {
+			addOtherExtension(project);
+		}
+
+		const sharedReferences = Object.keys(project.pbxFileReferenceSection())
+			.filter((key) => !key.endsWith('_comment'))
+			.filter((fileRef) => groupsReferencing(project, fileRef).length > 1);
+		expect(sharedReferences).toEqual([]);
+	});
+
+	it('compiles the source file through the reference in the extension group', async () => {
+		const project = await addServiceExtension(parseProject());
+
+		const objects = project.hash.project.objects;
+		const target = project.pbxTargetByName(`"${NSE_TARGET_NAME}"`);
+		const sourcesPhase = target.buildPhases.find((phase: { comment: string }) => phase.comment === 'Sources');
+		const compiledFiles = objects['PBXSourcesBuildPhase'][sourcesPhase.value].files.map(
+			(file: { value: string }) => objects['PBXBuildFile'][file.value].fileRef
+		);
+
+		expect(compiledFiles).toHaveLength(1);
+		expect(extensionGroup(project).children).toContainEqual(expect.objectContaining({ value: compiledFiles[0] }));
 	});
 
 	it('does not add the target twice', async () => {
