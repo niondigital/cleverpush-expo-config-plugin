@@ -10,5 +10,4 @@ export const NCE_FILES = [NCE_SOURCE_FILE, 'NotificationViewController.h', 'Info
 
 export const APP_GROUP_SUFFIX = 'cleverpush';
 
-export const IPHONEOS_DEPLOYMENT_TARGET = '12.0';
 export const TARGETED_DEVICE_FAMILY = `"1,2"`;
