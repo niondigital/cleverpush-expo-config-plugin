@@ -1,8 +1,11 @@
 export type AndroidNotificationChannelsProps = {
-	/** Key in the push's `customData` whose value selects the channel, e.g. `category`. */
+	/** Key in the push's `customData` whose value selects the channel, e.g. `channel`. */
 	customDataKey: string;
-	/** Maps a `customData` value to the id of an Android notification channel the app has created. */
-	channels: Record<string, string>;
+	/**
+	 * Optional map from a `customData` value to the id of an Android notification channel the app has
+	 * created. Values without an entry are used as the channel id directly.
+	 */
+	channels?: Record<string, string>;
 };
 
 export type CleverPushPluginProps = {

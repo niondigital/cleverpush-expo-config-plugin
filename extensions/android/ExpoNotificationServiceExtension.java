@@ -59,8 +59,9 @@ public class ExpoNotificationServiceExtension implements NotificationServiceExte
 	}
 
 	/**
-	 * Looks up the app channel mapped to the push's customData value. Returns null whenever the mapping, the
-	 * value or the channel is missing, so the push keeps the SDK's default channel instead of being dropped.
+	 * Looks up the app channel for the push's customData value: the channel mapped to the value, or else the
+	 * channel whose id equals the value. Returns null whenever the value or the channel is missing, so the push
+	 * keeps the SDK's default channel instead of being dropped.
 	 *
 	 * Only existing channels are used: their importance and sound are defined by the app. The SDK still calls
 	 * setSound() and createNotificationChannel() on the returned channel, but for a channel that already exists
@@ -80,7 +81,7 @@ public class ExpoNotificationServiceExtension implements NotificationServiceExte
 			String customDataKey = customDataKeyValue != null ? customDataKeyValue.toString() : null;
 			String channelsJson = appInfo.metaData.getString(CHANNELS_META_DATA);
 			Map<?, ?> customData = notification.getCustomData();
-			if (customDataKey == null || channelsJson == null || customData == null) {
+			if (customDataKey == null || customData == null) {
 				return null;
 			}
 
@@ -89,15 +90,19 @@ public class ExpoNotificationServiceExtension implements NotificationServiceExte
 				return null;
 			}
 
-			String channelId = new JSONObject(channelsJson).optString(value.toString(), null);
-			if (channelId == null) {
-				return null;
-			}
+			String mappedChannelId = channelsJson != null ? new JSONObject(channelsJson).optString(value.toString(), null) : null;
+			String channelId = mappedChannelId != null ? mappedChannelId : value.toString();
 
 			NotificationManager notificationManager = context.getSystemService(NotificationManager.class);
 			NotificationChannel channel = notificationManager != null ? notificationManager.getNotificationChannel(channelId) : null;
 			if (channel == null) {
-				Log.w(TAG, "Notification channel " + channelId + " for " + value + " does not exist, using the default channel");
+				// Without a mapping entry, a value that isn't a channel id is expected and only worth a debug line.
+				String message = "Notification channel " + channelId + " for " + value + " does not exist, using the default channel";
+				if (mappedChannelId != null) {
+					Log.w(TAG, message);
+				} else {
+					Log.d(TAG, message);
+				}
 			}
 			return channel;
 		} catch (Exception e) {

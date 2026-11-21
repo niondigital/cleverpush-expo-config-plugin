@@ -50,8 +50,8 @@ const metaData = (manifest: AndroidManifest): Record<string, string | undefined>
 	);
 
 const CHANNELS: CleverPushPluginProps['androidNotificationChannels'] = {
-	customDataKey: 'category',
-	channels: { locked_movement: 'locked_movement_v2', bike_battery_low: 'battery_v2' }
+	customDataKey: 'type',
+	channels: { order_shipped: 'orders', chat_message: 'messages' }
 };
 
 describe('withExtensionAndroidManifest', () => {
@@ -67,20 +67,39 @@ describe('withExtensionAndroidManifest', () => {
 		const manifest = await applyPlugin(emptyManifest(), { androidNotificationChannels: CHANNELS });
 
 		const entries = metaData(manifest);
-		expect(entries[NOTIFICATION_CHANNEL_KEY_META_DATA]).toBe('category');
+		expect(entries[NOTIFICATION_CHANNEL_KEY_META_DATA]).toBe('type');
 		expect(JSON.parse(entries[NOTIFICATION_CHANNELS_META_DATA]!)).toEqual(CHANNELS!.channels);
+	});
+
+	it('writes only the key when the values are used as channel ids directly', async () => {
+		const manifest = await applyPlugin(emptyManifest(), {
+			androidNotificationChannels: { customDataKey: 'channel' }
+		});
+
+		const entries = metaData(manifest);
+		expect(entries[NOTIFICATION_CHANNEL_KEY_META_DATA]).toBe('channel');
+		expect(entries).not.toHaveProperty(NOTIFICATION_CHANNELS_META_DATA);
 	});
 
 	it('updates the channel mapping in place on a repeated prebuild', async () => {
 		const first = await applyPlugin(emptyManifest(), { androidNotificationChannels: CHANNELS });
 		const second = await applyPlugin(first, {
-			androidNotificationChannels: { customDataKey: 'type', channels: { alarm: 'alarm_v3' } }
+			androidNotificationChannels: { customDataKey: 'kind', channels: { reminder: 'reminders' } }
 		});
 
 		const entries = metaData(second);
 		expect(Object.keys(entries)).toHaveLength(3);
-		expect(entries[NOTIFICATION_CHANNEL_KEY_META_DATA]).toBe('type');
-		expect(JSON.parse(entries[NOTIFICATION_CHANNELS_META_DATA]!)).toEqual({ alarm: 'alarm_v3' });
+		expect(entries[NOTIFICATION_CHANNEL_KEY_META_DATA]).toBe('kind');
+		expect(JSON.parse(entries[NOTIFICATION_CHANNELS_META_DATA]!)).toEqual({ reminder: 'reminders' });
+	});
+
+	it('removes the mapping when only the channels are dropped', async () => {
+		const withChannels = await applyPlugin(emptyManifest(), { androidNotificationChannels: CHANNELS });
+		const withoutChannels = await applyPlugin(withChannels, {
+			androidNotificationChannels: { customDataKey: 'type' }
+		});
+
+		expect(metaData(withoutChannels)).not.toHaveProperty(NOTIFICATION_CHANNELS_META_DATA);
 	});
 
 	it('removes the channel mapping when the option is dropped', async () => {
@@ -91,11 +110,23 @@ describe('withExtensionAndroidManifest', () => {
 	});
 
 	it.each([
-		['an empty customDataKey', { customDataKey: ' ', channels: { alarm: 'alarm_v2' } }, /customDataKey/],
-		['a missing channels object', { customDataKey: 'category' }, /channels must be an object/],
-		['an array of channels', { customDataKey: 'category', channels: ['alarm_v2'] }, /channels must be an object/],
-		['an empty channel id', { customDataKey: 'category', channels: { alarm: '' } }, /channels\["alarm"\]/],
-		['a non-string channel id', { customDataKey: 'category', channels: { alarm: 2 } }, /channels\["alarm"\]/]
+		['an empty customDataKey', { customDataKey: ' ' }, /customDataKey/],
+		[
+			'a channels value that is no object',
+			{ customDataKey: 'type', channels: 'orders' },
+			/channels must be an object/
+		],
+		['an array of channels', { customDataKey: 'type', channels: ['orders'] }, /channels must be an object/],
+		[
+			'an empty channel id',
+			{ customDataKey: 'type', channels: { order_shipped: '' } },
+			/channels\["order_shipped"\]/
+		],
+		[
+			'a non-string channel id',
+			{ customDataKey: 'type', channels: { order_shipped: 2 } },
+			/channels\["order_shipped"\]/
+		]
 	])('fails the prebuild on %s', async (_, androidNotificationChannels, message) => {
 		await expect(
 			applyPlugin(emptyManifest(), {

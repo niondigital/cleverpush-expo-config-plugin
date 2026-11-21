@@ -19,6 +19,9 @@ const validateAndroidNotificationChannels = (channels: AndroidNotificationChanne
 	if (!isNonEmptyString(channels.customDataKey)) {
 		throw new Error(`${prefix}.customDataKey must be a non-empty string.`);
 	}
+	if (channels.channels === undefined) {
+		return;
+	}
 	if (typeof channels.channels !== 'object' || channels.channels === null || Array.isArray(channels.channels)) {
 		throw new Error(`${prefix}.channels must be an object that maps customData values to channel ids.`);
 	}
@@ -50,27 +53,19 @@ export const withExtensionAndroidManifest: ConfigPlugin<CleverPushPluginProps> =
 			extensionClassName
 		);
 
+		// A prebuild without --clean keeps the manifest of the previous run, so entries of a removed option
+		// have to be removed explicitly.
+		const setOrRemove = (name: string, value: string | undefined): void => {
+			if (value === undefined) {
+				AndroidConfig.Manifest.removeMetaDataItemFromMainApplication(application, name);
+			} else {
+				AndroidConfig.Manifest.addMetaDataItemToMainApplication(application, name, value);
+			}
+		};
+
 		const channels = props?.androidNotificationChannels;
-		if (channels) {
-			AndroidConfig.Manifest.addMetaDataItemToMainApplication(
-				application,
-				NOTIFICATION_CHANNEL_KEY_META_DATA,
-				channels.customDataKey
-			);
-			AndroidConfig.Manifest.addMetaDataItemToMainApplication(
-				application,
-				NOTIFICATION_CHANNELS_META_DATA,
-				JSON.stringify(channels.channels)
-			);
-		} else {
-			// A prebuild without --clean keeps the manifest of the previous run, so a removed option has
-			// to remove its entries explicitly.
-			AndroidConfig.Manifest.removeMetaDataItemFromMainApplication(
-				application,
-				NOTIFICATION_CHANNEL_KEY_META_DATA
-			);
-			AndroidConfig.Manifest.removeMetaDataItemFromMainApplication(application, NOTIFICATION_CHANNELS_META_DATA);
-		}
+		setOrRemove(NOTIFICATION_CHANNEL_KEY_META_DATA, channels?.customDataKey);
+		setOrRemove(NOTIFICATION_CHANNELS_META_DATA, channels?.channels && JSON.stringify(channels.channels));
 
 		return config;
 	});
