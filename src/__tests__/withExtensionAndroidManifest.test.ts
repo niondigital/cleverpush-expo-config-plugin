@@ -73,11 +73,11 @@ describe('withExtensionAndroidManifest', () => {
 
 	it('writes only the key when the values are used as channel ids directly', async () => {
 		const manifest = await applyPlugin(emptyManifest(), {
-			androidNotificationChannels: { customDataKey: 'channel' }
+			androidNotificationChannels: { customDataKey: 'notificationChannel' }
 		});
 
 		const entries = metaData(manifest);
-		expect(entries[NOTIFICATION_CHANNEL_KEY_META_DATA]).toBe('channel');
+		expect(entries[NOTIFICATION_CHANNEL_KEY_META_DATA]).toBe('notificationChannel');
 		expect(entries).not.toHaveProperty(NOTIFICATION_CHANNELS_META_DATA);
 	});
 

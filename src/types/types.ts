@@ -1,5 +1,5 @@
 export type AndroidNotificationChannelsProps = {
-	/** Key in the push's `customData` whose value selects the channel, e.g. `channel`. */
+	/** Key in the push's `customData` whose value selects the channel, e.g. `notificationChannel`. */
 	customDataKey: string;
 	/**
 	 * Optional map from a `customData` value to the id of an Android notification channel the app has

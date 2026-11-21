@@ -59,13 +59,13 @@ With `androidNotificationChannels`, the notification service extension posts a p
 ## Setup
 
 1. Create the channels in your app, e.g. with `setNotificationChannelAsync` of `expo-notifications`. The extension only uses existing channels and never creates one.
-2. Send the channel in `customData` of the push, e.g. `"customData": { "channel": "orders" }`.
+2. Send the channel id in `customData` of the push, e.g. `"customData": { "notificationChannel": "orders" }`. Avoid a plain `channel` key: in CleverPush, a channel is the project the push is sent from.
 3. Tell the plugin which `customData` key to read:
 
 ```json
 {
   "expo": {
-    "plugins": [["@niondigital/cleverpush-expo-config-plugin", { "androidNotificationChannels": { "customDataKey": "channel" } }]]
+    "plugins": [["@niondigital/cleverpush-expo-config-plugin", { "androidNotificationChannels": { "customDataKey": "notificationChannel" } }]]
   }
 }
 ```
