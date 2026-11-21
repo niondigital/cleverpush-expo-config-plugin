@@ -25,8 +25,11 @@ export const withAndroidExtensionFile: ConfigPlugin<CleverPushPluginProps> = (co
 
 			await fs.promises.mkdir(targetExtensionPath, { recursive: true });
 
-			let content = await fs.promises.readFile(`${sourcePath}/${filename}`, 'utf8');
-			content = content.replace(/com.niondigital.cleverpush/g, packageName);
+			// Only the package declaration and the R import move to the app package. A global replace would
+			// also rewrite string literals such as the <meta-data> names the extension reads.
+			const content = (await fs.promises.readFile(`${sourcePath}/${filename}`, 'utf8'))
+				.replace(/^package com\.niondigital\.cleverpush;/m, `package ${packageName};`)
+				.replace(/^import com\.niondigital\.cleverpush\.R;/m, `import ${packageName}.R;`);
 
 			await fs.promises.writeFile(`${targetExtensionPath}/${filename}`, content);
 
