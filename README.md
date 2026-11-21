@@ -60,3 +60,10 @@ Contributions are very welcome! Please refer to guidelines described in the [con
   ```
 
   The Android notification service extension reads the push's `customData[customDataKey]` and posts the push on the mapped channel. The app has to create these channels itself (e.g. with `setNotificationChannelAsync` of `expo-notifications`), the extension never creates one. If the value, its mapping or the channel is missing, the push stays on the default channel. Android never raises the importance or changes the sound of an existing channel, so changing either means a new channel id.
+
+  CleverPush notification categories are the built-in alternative, but they don't hold up for channels with a custom sound:
+
+  - The sender has to put the category **id** into each push (`category`), which differs per CleverPush channel and therefore per environment. A category name is discarded.
+  - The SDK stores the category's sound in the Android channel as a numeric resource id (`android.resource://<package>/<id>`) and only recreates the channel when the category changes. Resource ids shift between app builds, so after an app update the channel can play a different raw resource of the app.
+
+  Channels created by the app (e.g. by `expo-notifications`) reference the sound by name (`raw/<name>`) and support the same settings as a category: importance, vibration pattern, lights, badge and lock screen visibility. A push that carries a CleverPush category still uses the category's channel, because the SDK gives the category precedence over the channel set by the extension.
