@@ -10,4 +10,10 @@ export const NCE_FILES = [NCE_SOURCE_FILE, 'NotificationViewController.h', 'Info
 
 export const APP_GROUP_SUFFIX = 'cleverpush';
 
+// Read by the CleverPush SDK to find the notification service extension.
+export const NOTIFICATION_SERVICE_EXTENSION_META_DATA = 'com.cleverpush.NotificationServiceExtension';
+// Read by ExpoNotificationServiceExtension.java; keep both names in sync with it.
+export const NOTIFICATION_CHANNEL_KEY_META_DATA = 'com.niondigital.cleverpush.notification_channel_key';
+export const NOTIFICATION_CHANNELS_META_DATA = 'com.niondigital.cleverpush.notification_channels';
+
 export const TARGETED_DEVICE_FAMILY = `"1,2"`;
