@@ -48,3 +48,15 @@ Contributions are very welcome! Please refer to guidelines described in the [con
 
 - `includeContentExtension` (default `true`): also adds the Notification Content Extension. Changing this option afterwards requires `npx expo prebuild --clean`, a prebuild without `--clean` keeps the targets and Podfile entries of the previous run.
 - The extension targets take the iOS deployment target of the app target. Raise it through `expo.ios.deploymentTarget` in the app config (Expo SDK 56+), the extensions follow automatically. The deprecated `ios.deploymentTarget` option of `expo-build-properties` is not picked up reliably: it only reaches the extensions when `expo-build-properties` is listed after this plugin.
+- `androidNotificationChannels` (optional): posts Android pushes on notification channels of the app instead of the CleverPush default channel. Without it, the CleverPush SDK puts every push on its own default channel, so the importance and sound of app channels never apply, and `soundFilename` is not delivered to Android at all.
+
+  ```json
+  {
+    "androidNotificationChannels": {
+      "customDataKey": "category",
+      "channels": { "locked_movement": "locked_movement_v2", "battery_low": "battery_v2" }
+    }
+  }
+  ```
+
+  The Android notification service extension reads the push's `customData[customDataKey]` and posts the push on the mapped channel. The app has to create these channels itself (e.g. with `setNotificationChannelAsync` of `expo-notifications`), the extension never creates one. If the value, its mapping or the channel is missing, the push stays on the default channel. Android never raises the importance or changes the sound of an existing channel, so changing either means a new channel id.
