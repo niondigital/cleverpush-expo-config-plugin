@@ -89,4 +89,19 @@ describe('withExtensionAndroidManifest', () => {
 
 		expect(Object.keys(metaData(withoutChannels))).toEqual([NOTIFICATION_SERVICE_EXTENSION_META_DATA]);
 	});
+
+	it.each([
+		['an empty customDataKey', { customDataKey: ' ', channels: { alarm: 'alarm_v2' } }, /customDataKey/],
+		['a missing channels object', { customDataKey: 'category' }, /channels must be an object/],
+		['an array of channels', { customDataKey: 'category', channels: ['alarm_v2'] }, /channels must be an object/],
+		['an empty channel id', { customDataKey: 'category', channels: { alarm: '' } }, /channels\["alarm"\]/],
+		['a non-string channel id', { customDataKey: 'category', channels: { alarm: 2 } }, /channels\["alarm"\]/]
+	])('fails the prebuild on %s', async (_, androidNotificationChannels, message) => {
+		await expect(
+			applyPlugin(emptyManifest(), {
+				androidNotificationChannels:
+					androidNotificationChannels as unknown as CleverPushPluginProps['androidNotificationChannels']
+			})
+		).rejects.toThrow(message);
+	});
 });

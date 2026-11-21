@@ -75,7 +75,9 @@ public class ExpoNotificationServiceExtension implements NotificationServiceExte
 				return null;
 			}
 
-			String customDataKey = appInfo.metaData.getString(CHANNEL_KEY_META_DATA);
+			// Android stores a <meta-data> value such as "1" or "true" as int or boolean, so the key is read untyped.
+			Object customDataKeyValue = appInfo.metaData.get(CHANNEL_KEY_META_DATA);
+			String customDataKey = customDataKeyValue != null ? customDataKeyValue.toString() : null;
 			String channelsJson = appInfo.metaData.getString(CHANNELS_META_DATA);
 			Map<?, ?> customData = notification.getCustomData();
 			if (customDataKey == null || channelsJson == null || customData == null) {

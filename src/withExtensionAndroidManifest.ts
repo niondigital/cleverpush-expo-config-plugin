@@ -5,13 +5,39 @@ import {
 	NOTIFICATION_CHANNELS_META_DATA,
 	NOTIFICATION_SERVICE_EXTENSION_META_DATA
 } from './constants';
-import { CleverPushPluginProps } from './types/types';
+import { AndroidNotificationChannelsProps, CleverPushPluginProps } from './types/types';
+
+const isNonEmptyString = (value: unknown): value is string => typeof value === 'string' && value.trim().length > 0;
+
+/**
+ * Fails the prebuild on an invalid mapping. Otherwise the extension would only fall back to the default
+ * channel at runtime, which goes unnoticed until a push sounds wrong on a device.
+ */
+const validateAndroidNotificationChannels = (channels: AndroidNotificationChannelsProps): void => {
+	const prefix = '[cleverpush-expo-config-plugin] androidNotificationChannels';
+
+	if (!isNonEmptyString(channels.customDataKey)) {
+		throw new Error(`${prefix}.customDataKey must be a non-empty string.`);
+	}
+	if (typeof channels.channels !== 'object' || channels.channels === null || Array.isArray(channels.channels)) {
+		throw new Error(`${prefix}.channels must be an object that maps customData values to channel ids.`);
+	}
+	Object.entries(channels.channels).forEach(([value, channelId]) => {
+		if (!isNonEmptyString(channelId)) {
+			throw new Error(`${prefix}.channels["${value}"] must be a non-empty channel id.`);
+		}
+	});
+};
 
 /**
  * Registers the notification service extension and hands the channel mapping to it via <meta-data>.
  */
 export const withExtensionAndroidManifest: ConfigPlugin<CleverPushPluginProps> = (config, props) => {
 	const extensionClassName = `${config.android?.package as string}.ExpoNotificationServiceExtension`;
+
+	if (props?.androidNotificationChannels) {
+		validateAndroidNotificationChannels(props.androidNotificationChannels);
+	}
 
 	return withAndroidManifest(config, (config) => {
 		const application = AndroidConfig.Manifest.getMainApplicationOrThrow(config.modResults);
